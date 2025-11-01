@@ -6,50 +6,36 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
-import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "products")
-public class Product {
+@Table(name = "categories")
+public class Category {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @Column(nullable = false, length = 120)
+  @Column(nullable = false, unique = true, length = 100)
   private String name;
 
-  @Column(nullable = false, length = 255)
+  @Column(length = 500)
   private String description;
-
-  @Column(nullable = false, precision = 12, scale = 2)
-  private BigDecimal price;
-
-  @Column(nullable = false)
-  private Integer stock;
-
-  @ManyToMany(fetch = FetchType.LAZY)
-  @JoinTable(
-      name = "product_categories",
-      joinColumns = @JoinColumn(name = "product_id"),
-      inverseJoinColumns = @JoinColumn(name = "category_id")
-  )
-  private List<Category> categories = new ArrayList<>();
 
   @Column(name = "created_at", nullable = false)
   private OffsetDateTime createdAt;
 
   @Column(name = "updated_at", nullable = false)
   private OffsetDateTime updatedAt;
+
+  @ManyToMany(mappedBy = "categories", fetch = FetchType.LAZY)
+  private List<Product> products = new ArrayList<>();
 
   @PrePersist
   public void prePersist() {
@@ -63,7 +49,7 @@ public class Product {
     this.updatedAt = OffsetDateTime.now();
   }
 
-  // Getters y setters (puedes generar con tu IDE)
+  // Getters y setters
 
   public Long getId() {
     return id;
@@ -89,30 +75,6 @@ public class Product {
     this.description = description;
   }
 
-  public BigDecimal getPrice() {
-    return price;
-  }
-
-  public void setPrice(BigDecimal price) {
-    this.price = price;
-  }
-
-  public Integer getStock() {
-    return stock;
-  }
-
-  public void setStock(Integer stock) {
-    this.stock = stock;
-  }
-
-  public List<Category> getCategories() {
-    return categories;
-  }
-
-  public void setCategories(List<Category> categories) {
-    this.categories = categories;
-  }
-
   public OffsetDateTime getCreatedAt() {
     return createdAt;
   }
@@ -128,4 +90,13 @@ public class Product {
   public void setUpdatedAt(OffsetDateTime updatedAt) {
     this.updatedAt = updatedAt;
   }
+
+  public List<Product> getProducts() {
+    return products;
+  }
+
+  public void setProducts(List<Product> products) {
+    this.products = products;
+  }
 }
+

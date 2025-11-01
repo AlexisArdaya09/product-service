@@ -5,21 +5,28 @@ import dev.alexisardaya.productservice.dto.ProductResponse;
 import dev.alexisardaya.productservice.dto.ProductSummaryResponse;
 import dev.alexisardaya.productservice.exception.ResourceNotFoundException;
 import dev.alexisardaya.productservice.mapper.ProductMapper;
+import dev.alexisardaya.productservice.model.Category;
 import dev.alexisardaya.productservice.model.Product;
+import dev.alexisardaya.productservice.repository.CategoryRepository;
 import dev.alexisardaya.productservice.repository.ProductRepository;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProductService {
 
   private final ProductRepository repository;
+  private final CategoryRepository categoryRepository;
 
-  public ProductService(ProductRepository repository) {
+  public ProductService(ProductRepository repository, CategoryRepository categoryRepository) {
     this.repository = repository;
+    this.categoryRepository = categoryRepository;
   }
 
+  @Transactional(readOnly = true)
   public List<ProductResponse> findAll(String name) {
     List<Product> products = (name == null || name.isBlank())
         ? repository.findAll()
@@ -29,6 +36,7 @@ public class ProductService {
         .collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   public List<ProductSummaryResponse> findAllAndSummary() {
     List<Product> products = repository.findAll();
     return products.stream()
@@ -36,26 +44,56 @@ public class ProductService {
         .collect(Collectors.toList());
   }
 
+  @Transactional(readOnly = true)
   public ProductResponse findById(Long id) {
     Product product = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Producto " + id + " no encontrado"));
     return ProductMapper.toResponse(product);
   }
 
+  @Transactional
   public ProductResponse create(ProductRequest request) {
+    List<Category> categories = categoryRepository.findAllById(request.categoryIds());
+    
+    if (categories.size() != request.categoryIds().size()) {
+      Set<Long> foundIds = categories.stream()
+          .map(Category::getId)
+          .collect(Collectors.toSet());
+      List<Long> missingIds = request.categoryIds().stream()
+          .filter(id -> !foundIds.contains(id))
+          .collect(Collectors.toList());
+      throw new ResourceNotFoundException(
+          "Categorías no encontradas: " + missingIds);
+    }
+
     Product product = new Product();
-    Product saved = repository.save(ProductMapper.toEntity(request, product));
+    Product saved = repository.save(ProductMapper.toEntity(request, product, categories));
     return ProductMapper.toResponse(saved);
   }
 
+  @Transactional
   public ProductResponse update(Long id, ProductRequest request) {
     Product product = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Producto " + id + " no encontrado"));
-    Product updated = repository.save(ProductMapper.toEntity(request, product));
 
-    return ProductMapper.toResponse(ProductMapper.toEntity(request, updated));
+    List<Category> categories = categoryRepository.findAllById(request.categoryIds());
+    
+    if (categories.size() != request.categoryIds().size()) {
+      Set<Long> foundIds = categories.stream()
+          .map(Category::getId)
+          .collect(Collectors.toSet());
+      List<Long> missingIds = request.categoryIds().stream()
+          .filter(categoryId -> !foundIds.contains(categoryId))
+          .collect(Collectors.toList());
+      throw new ResourceNotFoundException(
+          "Categorías no encontradas: " + missingIds);
+    }
+
+    Product updated = repository.save(ProductMapper.toEntity(request, product, categories));
+    return ProductMapper.toResponse(updated);
   }
 
+  @Transactional
   public void delete(Long id) {
     if (!repository.existsById(id)) {
       throw new ResourceNotFoundException("Producto " + id + " no encontrado");
