@@ -2,6 +2,7 @@ package dev.alexisardaya.productservice.service;
 
 import dev.alexisardaya.productservice.dto.CategoryRequest;
 import dev.alexisardaya.productservice.dto.CategoryResponse;
+import dev.alexisardaya.productservice.exception.DuplicateResourceException;
 import dev.alexisardaya.productservice.exception.ResourceNotFoundException;
 import dev.alexisardaya.productservice.mapper.CategoryMapper;
 import dev.alexisardaya.productservice.model.Category;
@@ -36,6 +37,10 @@ public class CategoryService {
 
   @Transactional
   public CategoryResponse create(CategoryRequest request) {
+    if (repository.existsByName(request.name())) {
+      throw new DuplicateResourceException(
+          "Ya existe una categoría con el nombre: " + request.name());
+    }
     Category category = new Category();
     Category saved = repository.save(CategoryMapper.toEntity(request, category));
     return CategoryMapper.toResponse(saved);
@@ -45,6 +50,16 @@ public class CategoryService {
   public CategoryResponse update(Long id, CategoryRequest request) {
     Category category = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Categoría " + id + " no encontrada"));
+    
+    // Verificar si el nuevo nombre ya existe en otra categoría
+    repository.findByName(request.name())
+        .ifPresent(existingCategory -> {
+          if (!existingCategory.getId().equals(id)) {
+            throw new DuplicateResourceException(
+                "Ya existe otra categoría con el nombre: " + request.name());
+          }
+        });
+    
     Category updated = repository.save(CategoryMapper.toEntity(request, category));
     return CategoryMapper.toResponse(updated);
   }
