@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -28,8 +29,9 @@ public class CategoryController {
   }
 
   @GetMapping
-  public ResponseEntity<List<CategoryResponse>> findAll() {
-    return ResponseEntity.ok(service.findAll());
+  public ResponseEntity<List<CategoryResponse>> findAll(
+      @RequestParam(required = false) String name) {
+    return ResponseEntity.ok(service.findAll(name));
   }
 
   @GetMapping("/{id}")

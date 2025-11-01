@@ -7,7 +7,9 @@ import dev.alexisardaya.productservice.exception.DuplicateResourceException;
 import dev.alexisardaya.productservice.exception.OperationNotAllowedException;
 import dev.alexisardaya.productservice.exception.ResourceNotFoundException;
 import dev.alexisardaya.productservice.mapper.CategoryMapper;
+import dev.alexisardaya.productservice.mapper.ProductMapper;
 import dev.alexisardaya.productservice.model.Category;
+import dev.alexisardaya.productservice.model.Product;
 import dev.alexisardaya.productservice.repository.CategoryRepository;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,8 +26,11 @@ public class CategoryService {
   }
 
   @Transactional(readOnly = true)
-  public List<CategoryResponse> findAll() {
-    return repository.findAll().stream()
+  public List<CategoryResponse> findAll(String name) {
+    List<Category> categories = (name == null || name.isBlank())
+        ? repository.findAll()
+        : repository.findByNameContainingIgnoreCase(name);
+    return categories.stream()
         .map(CategoryMapper::toResponse)
         .collect(Collectors.toList());
   }
