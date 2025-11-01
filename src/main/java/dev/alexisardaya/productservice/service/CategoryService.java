@@ -2,7 +2,9 @@ package dev.alexisardaya.productservice.service;
 
 import dev.alexisardaya.productservice.dto.CategoryRequest;
 import dev.alexisardaya.productservice.dto.CategoryResponse;
+import dev.alexisardaya.productservice.dto.ProductSummaryResponse;
 import dev.alexisardaya.productservice.exception.DuplicateResourceException;
+import dev.alexisardaya.productservice.exception.OperationNotAllowedException;
 import dev.alexisardaya.productservice.exception.ResourceNotFoundException;
 import dev.alexisardaya.productservice.mapper.CategoryMapper;
 import dev.alexisardaya.productservice.model.Category;
@@ -33,6 +35,20 @@ public class CategoryService {
     Category category = repository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Categoría " + id + " no encontrada"));
     return CategoryMapper.toResponse(category);
+  }
+
+  @Transactional(readOnly = true)
+  public List<ProductSummaryResponse> findProductsByCategoryId(Long categoryId) {
+    Category category = repository.findById(categoryId)
+        .orElseThrow(() -> new ResourceNotFoundException("Categoría " + categoryId + " no encontrada"));
+    
+    return category.getProducts().stream()
+        .map(product -> new ProductSummaryResponse(
+            product.getId(),
+            product.getName(),
+            product.getPrice()
+        ))
+        .collect(Collectors.toList());
   }
 
   @Transactional
@@ -66,9 +82,20 @@ public class CategoryService {
 
   @Transactional
   public void delete(Long id) {
-    if (!repository.existsById(id)) {
-      throw new ResourceNotFoundException("Categoría " + id + " no encontrada");
+    Category category = repository.findById(id)
+        .orElseThrow(() -> new ResourceNotFoundException("Categoría " + id + " no encontrada"));
+    
+    if (!category.getProducts().isEmpty()) {
+      int productCount = category.getProducts().size();
+      throw new OperationNotAllowedException(
+          String.format(
+              "No se puede eliminar la categoría '%s' porque tiene %d producto(s) asociado(s). " +
+              "Elimine primero los productos asociados o desasócielos de esta categoría.",
+              category.getName(),
+              productCount
+          ));
     }
+    
     repository.deleteById(id);
   }
 }

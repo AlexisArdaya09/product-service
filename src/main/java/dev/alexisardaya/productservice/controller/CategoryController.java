@@ -2,6 +2,7 @@ package dev.alexisardaya.productservice.controller;
 
 import dev.alexisardaya.productservice.dto.CategoryRequest;
 import dev.alexisardaya.productservice.dto.CategoryResponse;
+import dev.alexisardaya.productservice.dto.ProductSummaryResponse;
 import dev.alexisardaya.productservice.service.CategoryService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -34,6 +35,12 @@ public class CategoryController {
   @GetMapping("/{id}")
   public ResponseEntity<CategoryResponse> findById(@PathVariable Long id) {
     return ResponseEntity.ok(service.findById(id));
+  }
+
+  @GetMapping("/{id}/products")
+  public ResponseEntity<List<ProductSummaryResponse>> findProductsByCategoryId(
+      @PathVariable Long id) {
+    return ResponseEntity.ok(service.findProductsByCategoryId(id));
   }
 
   @PostMapping

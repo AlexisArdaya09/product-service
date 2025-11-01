@@ -2,6 +2,7 @@ package dev.alexisardaya.productservice.exception;
 
 import dev.alexisardaya.productservice.dto.ErrorResponse;
 import dev.alexisardaya.productservice.exception.DuplicateResourceException;
+import dev.alexisardaya.productservice.exception.OperationNotAllowedException;
 import dev.alexisardaya.productservice.exception.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
@@ -39,6 +40,19 @@ public class GlobalExceptionHandler {
         OffsetDateTime.now(),
         HttpStatus.CONFLICT.value(),
         "DUPLICATE_RESOURCE",
+        ex.getMessage(),
+        request.getRequestURI()
+    );
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(OperationNotAllowedException.class)
+  public ResponseEntity<ErrorResponse> handleOperationNotAllowedException(
+      OperationNotAllowedException ex, HttpServletRequest request) {
+    ErrorResponse error = new ErrorResponse(
+        OffsetDateTime.now(),
+        HttpStatus.CONFLICT.value(),
+        "OPERATION_NOT_ALLOWED",
         ex.getMessage(),
         request.getRequestURI()
     );
