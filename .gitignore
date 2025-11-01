@@ -4,6 +4,15 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+# =====================================
+# CONFIGURACIONES Y VARIABLES
+# =====================================
+
+# Archivos locales y sensibles
+application-local.yml
+application-prod.yml
+.env
+
 ### STS ###
 .apt_generated
 .classpath
