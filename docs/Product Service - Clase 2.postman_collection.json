@@ -213,7 +213,45 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "409 - Categoría duplicada",
+							"originalRequest": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Electrónica\",\n  \"description\": \"Productos electrónicos y tecnología\"\n}"
+								},
+								"url": {
+									"raw": "{{baseURL}}/api/categories",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"api",
+										"categories"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"timestamp\": \"2024-10-31T22:45:00-04:00\",\n  \"status\": 409,\n  \"code\": \"DUPLICATE_RESOURCE\",\n  \"message\": \"Ya existe una categoría con el nombre: Electrónica\",\n  \"path\": \"/api/categories\"\n}"
+						}
+					]
 				},
 				{
 					"name": "Listar categorías",
@@ -278,7 +316,46 @@
 							]
 						}
 					},
-					"response": []
+					"response": [
+						{
+							"name": "409 - Categoría duplicada al actualizar",
+							"originalRequest": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Electrónica\",\n  \"description\": \"Productos electrónicos y tecnología actualizado\"\n}"
+								},
+								"url": {
+									"raw": "{{baseURL}}/api/categories/2",
+									"host": [
+										"{{baseURL}}"
+									],
+									"path": [
+										"api",
+										"categories",
+										"2"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Type",
+									"value": "application/json"
+								}
+							],
+							"cookie": [],
+							"body": "{\n  \"timestamp\": \"2024-10-31T22:45:00-04:00\",\n  \"status\": 409,\n  \"code\": \"DUPLICATE_RESOURCE\",\n  \"message\": \"Ya existe otra categoría con el nombre: Electrónica\",\n  \"path\": \"/api/categories/2\"\n}"
+						}
+					]
 				},
 				{
 					"name": "Eliminar categoría",
